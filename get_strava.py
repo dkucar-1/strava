@@ -3,12 +3,12 @@ import requests, logging
 from requests.exceptions import HTTPError
 from strava_auth import get_authorization_code, exchange_token
 
-def get_athlete(token_data):
+def get_athlete(token_data) -> dict:
     url = "https://www.strava.com/api/v3/athlete"
     header = {'Authorization': 'Bearer '+token_data['access_token']}
     return requests.get(url, headers=header).json()
 
-def get_activity(token, activity_id):
+def get_activity(token, activity_id) -> dict:
     url = f"https://www.strava.com/api/v3/activities/{activity_id}"
     header = {'Authorization': 'Bearer ' + token}
     resp = requests.get(url, headers=header)
@@ -18,7 +18,7 @@ def get_activity(token, activity_id):
     else:
         logging.warning(f"Activity {activity_id} not found: {resp.status_code}")
 
-def put_activities(creds, payload, name):
+def put_activities(creds, payload, name) -> dict:
     url = 'https://www.strava.com/api/v3/uploads'
     headers = {'Authorization': 'Bearer ' + creds}
     files = {
@@ -35,7 +35,7 @@ def put_activities(creds, payload, name):
         logging.error(f"Other error occurred: {err}")
     return resp.json()
 
-def process_gpx(filename, creds):
+def process_gpx(filename, creds) -> list:
     import re
     with open(filename, 'r') as read_file:
         file = read_file.read()
@@ -64,11 +64,13 @@ def process_gpx(filename, creds):
     return result
 
 # ── Main ───────────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-
+def main() -> None:
     logging.basicConfig(level=logging.INFO)
     code = get_authorization_code()
     token_data = exchange_token(code)
 
     file = 'test.gpx'
     result = process_gpx(file, token_data['access_token'])
+
+if __name__ == "__main__":
+    main()
