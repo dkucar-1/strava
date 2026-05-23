@@ -18,7 +18,7 @@ def get_activity(token, activity_id) -> dict:
     else:
         logging.warning(f"Activity {activity_id} not found: {resp.status_code}")
 
-def put_activities(creds, payload, name) -> dict:
+def put_activities(creds, payload, name) -> tuple:
     url = 'https://www.strava.com/api/v3/uploads'
     headers = {'Authorization': 'Bearer ' + creds}
     files = {
@@ -33,7 +33,7 @@ def put_activities(creds, payload, name) -> dict:
         logging.error(f"HTTP error occurred: {http_err}")
     except Exception as err:
         logging.error(f"Other error occurred: {err}")
-    return resp.json()
+    return resp.status_code, resp.content
 
 def process_gpx(filename, creds) -> None:
     import re
@@ -47,7 +47,7 @@ def process_gpx(filename, creds) -> None:
             for t in text[1:]:
                 name_regex = re.compile(r'<name>(.+?)</name>')
                 if name_regex.search(t):
-                    name = name_regex.search(t).group(1).strip()
+                    name = name_regex.search(t).group(1).strip().replace('/', '-')
                 else:
                     name = 'Unnamed Activity'
                 new_text = re.sub(r'(</name>)', r'\1<type>hiking</type>', t) 
@@ -57,9 +57,11 @@ def process_gpx(filename, creds) -> None:
                 filename = f"{name}.gpx"
                 with open(filename, 'w') as write_file:
                     write_file.write(payload)
-                logging.info(f"Uploading {filename}...")
                 result = put_activities(creds, payload, name)
-                logging.info(f"Upload result: {result}")
+                if result[0] > 399:
+                    logging.error(f"Failed to upload {filename}: {result[1]}")
+                else:
+                    logging.info(f"Successfully uploaded {filename}")
 
 # ── Main ───────────────────────────────────────────────────────────────────
 def main() -> None:
