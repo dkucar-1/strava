@@ -35,7 +35,7 @@ def put_activities(creds, payload, name) -> dict:
         logging.error(f"Other error occurred: {err}")
     return resp.json()
 
-def process_gpx(filename, creds) -> list:
+def process_gpx(filename, creds) -> None:
     import re
     with open(filename, 'r') as read_file:
         file = read_file.read()
@@ -44,7 +44,6 @@ def process_gpx(filename, creds) -> list:
         strava_header = '<?xml version="1.0" encoding="UTF-8"?><gpx creator="StravaGPX" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">'
         if header:
             text = file.removeprefix(header.group(1)).split("<trk>")
-            result = []
             for t in text[1:]:
                 name_regex = re.compile(r'<name>(.+?)</name>')
                 if name_regex.search(t):
@@ -59,9 +58,8 @@ def process_gpx(filename, creds) -> list:
                 with open(filename, 'w') as write_file:
                     write_file.write(payload)
                 logging.info(f"Uploading {filename}...")
-                result.append(put_activities(creds, payload, name))
+                result = put_activities(creds, payload, name)
                 logging.info(f"Upload result: {result}")
-    return result
 
 # ── Main ───────────────────────────────────────────────────────────────────
 def main() -> None:
@@ -70,7 +68,7 @@ def main() -> None:
     token_data = exchange_token(code)
 
     file = 'test.gpx'
-    result = process_gpx(file, token_data['access_token'])
+    process_gpx(file, token_data['access_token'])
 
 if __name__ == "__main__":
     main()
