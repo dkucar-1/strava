@@ -33,3 +33,8 @@ For our purposes, the `<type>..</type>` is always 'hiking'.
 The process is slightly complex and is handled in the `strava_auth` file. It's roughly described in the developer docs here 
 <br>
 https://developers.strava.com/docs/authentication/#refresh-expired-access-tokens
+
+## Usage
+```
+./get_strava.py <your-gpx-file>
+```

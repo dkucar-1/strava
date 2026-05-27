@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import requests, logging
+import requests, logging, sys
 from requests.exceptions import HTTPError
 from strava_auth import get_authorization_code, exchange_token
 
@@ -64,13 +64,13 @@ def process_gpx(filename, creds) -> None:
                     logging.info(f"Successfully uploaded {filename}")
 
 # ── Main ───────────────────────────────────────────────────────────────────
-def main() -> None:
+def main(args) -> None:
     logging.basicConfig(level=logging.INFO)
     code = get_authorization_code()
     token_data = exchange_token(code)
 
-    file = 'test.gpx'
+    file = args[1] if len(args) > 1 else exit("Usage: get_strava.py <gpx_file>")
     process_gpx(file, token_data['access_token'])
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
