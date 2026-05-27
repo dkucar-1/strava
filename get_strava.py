@@ -35,8 +35,9 @@ def put_activities(creds, payload, name) -> tuple:
         logging.error(f"Other error occurred: {err}")
     return resp.status_code, resp.content
 
-def process_gpx(filename, creds) -> None:
+def parse_gpx(filename) -> dict:
     import re
+    activities = {}
     with open(filename, 'r') as read_file:
         file = read_file.read()
         pattern = re.compile(r'(.+?)<trk>')
@@ -54,9 +55,15 @@ def process_gpx(filename, creds) -> None:
                 payload = strava_header + '<trk>' + new_text.rstrip()
                 if not payload.endswith('</gpx>'):
                     payload += '</gpx>'
-                filename = f"{name}.gpx"
-                with open(filename, 'w') as write_file:
-                    write_file.write(payload)
+                activities[name] = payload
+    return activities
+
+def upload_gpx(filename, creds) -> None:
+    activities = parse_gpx(filename)
+    for name, payload in activities.items():
+            filename = f"{name}.gpx"
+            with open(filename, 'w') as write_file:
+                write_file.write(payload)
                 result = put_activities(creds, payload, name)
                 if result[0] > 399:
                     logging.error(f"Failed to upload {filename}: {result[1]}")
@@ -69,8 +76,8 @@ def main(args) -> None:
     code = get_authorization_code()
     token_data = exchange_token(code)
 
-    file = args[1] if len(args) > 1 else exit("Usage: get_strava.py <gpx_file>")
-    process_gpx(file, token_data['access_token'])
+    filename = args[1] if len(args) > 1 else exit("Nothing to do.\nUsage: get_strava.py <gpx_file>")
+    upload_gpx(filename, token_data['access_token'])
 
 if __name__ == "__main__":
     main(sys.argv)
