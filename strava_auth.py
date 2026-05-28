@@ -117,7 +117,7 @@ def get_authorization_code():
     return auth_code["code"]
 
 # ── Step 2: Exchange code for tokens ───────────────────────────────────────
-def exchange_token(code):
+def exchange_token(code: str):
     """POSTs the authorization code to Strava and returns the token response."""
     strava_vars = get_strava_vars()
     CLIENT_ID = strava_vars['CLIENT_ID']
@@ -136,7 +136,7 @@ def exchange_token(code):
 
 
 # ── Step 3 (bonus): Refresh an expired token ───────────────────────────────
-def refresh_access_token(refresh_token):
+def refresh_access_token(refresh_token: str):
     """Uses a refresh token to get a new access token (handy for later)."""
     strava_vars = get_strava_vars()
     CLIENT_ID = strava_vars['CLIENT_ID']

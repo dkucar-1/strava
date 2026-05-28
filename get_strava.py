@@ -3,12 +3,12 @@ import requests, logging, sys
 from requests.exceptions import HTTPError
 from strava_auth import get_authorization_code, exchange_token
 
-def get_athlete(token_data) -> dict:
+def get_athlete(token_data: dict) -> dict:
     url = "https://www.strava.com/api/v3/athlete"
     header = {'Authorization': 'Bearer '+token_data['access_token']}
     return requests.get(url, headers=header).json()
 
-def get_activity(token, activity_id) -> dict:
+def get_activity(token: str, activity_id: str) -> dict:
     url = f"https://www.strava.com/api/v3/activities/{activity_id}"
     header = {'Authorization': 'Bearer ' + token}
     resp = requests.get(url, headers=header)
@@ -18,7 +18,7 @@ def get_activity(token, activity_id) -> dict:
     else:
         logging.warning(f"Activity {activity_id} not found: {resp.status_code}")
 
-def put_activities(creds, payload, name) -> tuple:
+def put_activities(creds: str, payload: str, name: str) -> tuple:
     url = 'https://www.strava.com/api/v3/uploads'
     headers = {'Authorization': 'Bearer ' + creds}
     files = {
@@ -35,7 +35,7 @@ def put_activities(creds, payload, name) -> tuple:
         logging.error(f"Other error occurred: {err}")
     return resp.status_code, resp.content
 
-def parse_gpx(filename) -> dict:
+def parse_gpx(filename: str) -> dict:
     import re
     activities = {}
     with open(filename, 'r') as read_file:
@@ -58,7 +58,7 @@ def parse_gpx(filename) -> dict:
                 activities[name] = payload
     return activities
 
-def upload_gpx(filename, creds) -> None:
+def upload_gpx(filename: str, creds: str) -> None:
     activities = parse_gpx(filename)
     for name, payload in activities.items():
             filename = f"{name}.gpx"
